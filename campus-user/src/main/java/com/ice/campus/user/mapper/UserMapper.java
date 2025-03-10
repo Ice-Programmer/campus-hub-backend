@@ -2,6 +2,7 @@ package com.ice.campus.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ice.campus.user.model.entity.User;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
 * @author chenjiahan
@@ -9,6 +10,7 @@ import com.ice.campus.user.model.entity.User;
 * @createDate 2025-03-09 22:12:38
 * @Entity generator.domain.User
 */
+@Mapper
 public interface UserMapper extends BaseMapper<User> {
 }
 

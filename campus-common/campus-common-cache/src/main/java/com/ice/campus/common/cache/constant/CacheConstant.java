@@ -6,7 +6,7 @@ package com.ice.campus.common.cache.constant;
  * @author <a href="https://github.com/IceProgramer">chenjiahan</a>
  * @create 2024/12/14 21:57
  */
-public interface CacheConstant extends BizConstant {
+public interface CacheConstant extends BizConstant, AuthConstant {
 
     /**
      * key内部的连接字符
