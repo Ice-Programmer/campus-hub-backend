@@ -11,12 +11,13 @@ import com.ice.campus.common.core.exception.ThrowUtils;
 import com.ice.campus.user.constant.UserConstant;
 import com.ice.campus.user.mapper.UserMapper;
 import com.ice.campus.user.model.entity.User;
-import com.ice.campus.common.auth.vo.LoginVO;
+import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.user.service.UserService;
 import com.ice.campus.common.auth.constant.UserRoleConstant;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -35,7 +36,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private RedisManager redisManager;
 
     @Override
-    public LoginVO userLoginByMail(String email, String verifyCode) {
+    public UserBasicInfo userLoginByMail(String email, String verifyCode) {
         // 1. 从缓存中判断验证码是否正确
         String emailHash = DigestUtils.md5DigestAsHex(email.getBytes());
         String verifyCodeCacheKey = CacheConstant.EMAIL_VERIFY_CODE_PREFIX + emailHash;
@@ -57,7 +58,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             user.setEmail(email);
             user.setUsername(UserConstant.generateUniqueUsername());
             user.setUserAvatar(UserConstant.getRandomUserAvatar());
-            baseMapper.insert(user);
+            try {
+                baseMapper.insert(user);
+            } catch (DuplicateKeyException e) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "请勿重复操作！");
+            }
         }
 
         // 3. 判断用户是否被 ban
@@ -66,10 +71,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 4. 填充基础信息
-        LoginVO loginVO = new LoginVO();
-        BeanUtils.copyProperties(user, loginVO);
-        loginVO.setEmail(email);
-        return loginVO;
+        UserBasicInfo userBasicInfo = new UserBasicInfo();
+        BeanUtils.copyProperties(user, userBasicInfo);
+        userBasicInfo.setEmail(email);
+        return userBasicInfo;
     }
 }
 

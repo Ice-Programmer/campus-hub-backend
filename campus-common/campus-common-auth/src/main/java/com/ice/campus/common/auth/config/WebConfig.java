@@ -1,0 +1,30 @@
+package com.ice.campus.common.auth.config;
+
+import com.ice.campus.common.auth.constant.InterceptorConstant;
+import com.ice.campus.common.auth.interceptor.AuthInterceptor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.annotation.Resource;
+
+/**
+ * 拦截器配置类
+ *
+ * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>
+ * @create 2025/3/10 15:34
+ */
+public class WebConfig implements WebMvcConfigurer {
+    @Resource
+    private AuthInterceptor authInterceptor;
+
+    /**
+     * 设置权限校验拦截器
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authInterceptor)
+                .addPathPatterns(InterceptorConstant.AUTH_INTERCEPTOR_PATH_PATTERN)
+                .excludePathPatterns(InterceptorConstant.AUTH_INTERCEPTOR_EXCLUDE_PATH_PATTERN)
+                .order(0);
+    }
+}

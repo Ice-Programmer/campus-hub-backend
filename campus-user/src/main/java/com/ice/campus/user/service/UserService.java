@@ -2,7 +2,7 @@ package com.ice.campus.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ice.campus.user.model.entity.User;
-import com.ice.campus.common.auth.vo.LoginVO;
+import com.ice.campus.common.auth.vo.UserBasicInfo;
 
 /**
  * @author chenjiahan
@@ -18,5 +18,5 @@ public interface UserService extends IService<User> {
      * @param verifyCode 验证码
      * @return 用户登录信息
      */
-    LoginVO userLoginByMail(String email, String verifyCode);
+    UserBasicInfo userLoginByMail(String email, String verifyCode);
 }

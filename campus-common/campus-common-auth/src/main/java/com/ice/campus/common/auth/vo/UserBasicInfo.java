@@ -9,7 +9,7 @@ import java.util.Date;
  * @create 2025/3/10 10:49
  */
 @Data
-public class LoginVO {
+public class UserBasicInfo {
 
     /**
      * 用户 id

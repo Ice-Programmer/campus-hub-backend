@@ -22,5 +22,5 @@ public class TokenCacheVO {
     /**
      * 用户基础信息
      */
-    private LoginVO loginVO;
+    private UserBasicInfo userBasicInfo;
 }

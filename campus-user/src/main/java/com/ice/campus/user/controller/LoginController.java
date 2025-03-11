@@ -1,5 +1,6 @@
 package com.ice.campus.user.controller;
 
+import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.ResultUtils;
 import com.ice.campus.common.core.constant.ErrorCode;
@@ -10,7 +11,7 @@ import com.ice.campus.common.core.utils.ValidatorUtil;
 import com.ice.campus.user.model.request.user.UserMailLoginRequest;
 import com.ice.campus.user.service.UserService;
 import com.ice.campus.common.auth.client.TokenClient;
-import com.ice.campus.common.auth.vo.LoginVO;
+import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.common.auth.vo.TokenVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,15 +54,30 @@ public class LoginController {
         ThrowUtils.throwIf(verifyCode.length() != 6, ErrorCode.PARAMS_ERROR, "验证码长度错误");
 
         // 登录
-        LoginVO loginVO = userService.userLoginByMail(email, verifyCode);
+        UserBasicInfo userBasicInfo = userService.userLoginByMail(email, verifyCode);
 
         // 保存 redis
-        String userRole = loginVO.getRole();
+        String userRole = userBasicInfo.getRole();
         String device = DeviceUtil.getRequestDevice(request);
-        TokenVO tokenVO = tokenClient.createTokenVOAndStore(loginVO, device);
+        TokenVO tokenVO = tokenClient.createTokenVOAndStore(userBasicInfo, device);
         log.info("User {} ({} role) Login by {} Successfully! userId: {}",
-                loginVO.getUsername(), userRole, device, loginVO.getId());
+                userBasicInfo.getUsername(), userRole, device, userBasicInfo.getId());
 
         return ResultUtils.success(tokenVO);
+    }
+
+    /**
+     * 用户退出登录
+     *
+     * @param request request
+     * @return 退出登录成功
+     */
+    @PostMapping("/logout")
+    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+        UserBasicInfo currentUser = SecurityContext.getCurrentUser();
+        String device = DeviceUtil.getRequestDevice(request);
+        // 移除缓存中当前设备登录信息
+        tokenClient.removeTokenCache(currentUser, device);
+        return ResultUtils.success(true);
     }
 }

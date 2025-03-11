@@ -8,7 +8,7 @@ import com.ice.campus.common.core.constant.LogColorConstant;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.common.auth.constant.JwtConstant;
 import com.ice.campus.common.auth.constant.UserRoleConstant;
-import com.ice.campus.common.auth.vo.LoginVO;
+import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.common.auth.vo.TokenCacheVO;
 import com.ice.campus.common.auth.vo.TokenVO;
 import io.jsonwebtoken.*;
@@ -40,16 +40,16 @@ public class TokenClient {
     /**
      * 生成 token 并存储在缓存中
      *
-     * @param loginVO 用户基础信息
+     * @param userBasicInfo 用户基础信息
      * @param device  当前登录设备
      * @return tokenVO
      */
-    public TokenVO createTokenVOAndStore(LoginVO loginVO, String device) {
+    public TokenVO createTokenVOAndStore(UserBasicInfo userBasicInfo, String device) {
         long current = System.currentTimeMillis();
-        String userRole = loginVO.getRole();
+        String userRole = userBasicInfo.getRole();
         long expireCacheTime = getExpireTime(userRole);
         Date date = new Date(current + expireCacheTime);
-        Long userId = loginVO.getId();
+        Long userId = userBasicInfo.getId();
 
         // 生成 jwt token
         SecretKey key = Keys.hmacShaKeyFor(JwtConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8));
@@ -73,7 +73,7 @@ public class TokenClient {
         TokenCacheVO tokenCacheVO = new TokenCacheVO();
         tokenCacheVO.setAccessToken(accessToken);
         tokenCacheVO.setDevice(device);
-        tokenCacheVO.setLoginVO(loginVO);
+        tokenCacheVO.setUserBasicInfo(userBasicInfo);
         storeToken(cacheKey, tokenCacheVO, expireCacheTime);
 
         return tokenVO;
@@ -127,7 +127,7 @@ public class TokenClient {
      * @param accessToken accessToken
      * @return 用户基础信息
      */
-    public LoginVO checkTokenAndGetUserBasicInfo(String accessToken) {
+    public UserBasicInfo checkTokenAndGetUserBasicInfo(String accessToken) {
         if (StringUtils.isEmpty(accessToken)) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "用户未登录");
         }
@@ -170,20 +170,20 @@ public class TokenClient {
         TokenCacheVO tokenCacheVO = redisManager.getObject(cacheKey, TokenCacheVO.class);
 
         // 返回用户基础信息
-        return tokenCacheVO.getLoginVO();
+        return tokenCacheVO.getUserBasicInfo();
     }
 
     /**
      * 移除当前用户 token 缓存
      *
-     * @param loginVO 用户基础信息
+     * @param userBasicInfo 用户基础信息
      * @param device          当前登录设备
      */
-    public void removeTokenCache(LoginVO loginVO, String device) {
-        String cacheKey = CacheConstant.ACCESS + getCacheKey(String.valueOf(loginVO.getId()), device);
+    public void removeTokenCache(UserBasicInfo userBasicInfo, String device) {
+        String cacheKey = CacheConstant.ACCESS + getCacheKey(String.valueOf(userBasicInfo.getId()), device);
         redisManager.delete(cacheKey);
         log.info("当前用户名: {}, id: {}, 退出 {} 端登录",
-                loginVO.getUsername(), loginVO.getId(), device);
+                userBasicInfo.getUsername(), userBasicInfo.getId(), device);
     }
 
     /**
