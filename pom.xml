@@ -12,6 +12,7 @@
         <module>campus-common</module>
         <module>campus-user</module>
         <module>campus-biz</module>
+        <module>campus-post</module>
     </modules>
 
     <properties>
@@ -19,7 +20,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.3.5</spring-boot.version>
-        <spring-boot.version>2.7.6</spring-boot.version>
         <knife4j.version>4.4.0</knife4j.version>
         <lombok.version>1.18.36</lombok.version>
         <gson.version>2.9.1</gson.version>
@@ -43,7 +43,7 @@
             <!-- 接口文档：https://doc.xiaominfo.com/docs/quick-start#spring-boot-2-->
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
                 <version>${knife4j.version}</version>
             </dependency>
             <dependency>
@@ -54,9 +54,9 @@
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-bom</artifactId>
-                <version>${mybatis-plus.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+                <version>${mybatis-plus.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>

@@ -5,10 +5,10 @@ import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
 import com.ice.campus.common.core.constant.ErrorCode;
 import com.ice.campus.common.core.exception.ThrowUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>

@@ -13,14 +13,14 @@ import com.ice.campus.user.service.UserService;
 import com.ice.campus.common.auth.client.TokenClient;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.common.auth.vo.TokenVO;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 用户控制器

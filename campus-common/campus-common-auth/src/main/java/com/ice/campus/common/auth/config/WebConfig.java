@@ -5,7 +5,7 @@ import com.ice.campus.common.auth.interceptor.AuthInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * 拦截器配置类

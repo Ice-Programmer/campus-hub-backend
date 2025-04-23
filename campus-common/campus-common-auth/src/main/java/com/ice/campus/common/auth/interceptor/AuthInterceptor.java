@@ -3,13 +3,13 @@ package com.ice.campus.common.auth.interceptor;
 import com.ice.campus.common.auth.client.TokenClient;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
 
 /**
  * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>
