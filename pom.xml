@@ -16,8 +16,8 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.3.5</spring-boot.version>
         <knife4j.version>4.4.0</knife4j.version>
@@ -29,6 +29,7 @@
         <hutool-version>5.8.26</hutool-version>
         <dubbo.version>3.3.0</dubbo.version>
         <nacos.version>2.1.2</nacos.version>
+        <jts-version>1.19.0</jts-version>
     </properties>
 
     <dependencyManagement>
@@ -86,6 +87,12 @@
                 <version>${dubbo.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
+            <dependency>
+                <groupId>org.locationtech.jts</groupId>
+                <artifactId>jts-core</artifactId>
+                <version>${jts-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

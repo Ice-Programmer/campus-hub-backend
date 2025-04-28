@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ice</groupId>
-        <artifactId>campus-common</artifactId>
+        <artifactId>campus-hub-backend</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>campus-common-cache</artifactId>
+    <artifactId>campus-post</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -24,8 +24,14 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>com.ice</groupId>
+            <artifactId>campus-common-cache</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ice</groupId>
+            <artifactId>campus-common-auth</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

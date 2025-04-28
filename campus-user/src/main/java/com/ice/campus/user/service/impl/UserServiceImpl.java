@@ -54,6 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         // 2.1 不存在新用户插入数据库
         if (ObjectUtils.isEmpty(user)) {
+            // todo 线程安全问题
             user = new User();
             user.setEmail(email);
             user.setUsername(UserConstant.generateUniqueUsername());
