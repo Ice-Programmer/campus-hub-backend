@@ -10,7 +10,7 @@ create table if not exists user
     `id`           bigint auto_increment comment 'id' primary key,
     `username`     varchar(126)                           null comment '用户昵称',
     `email`        varchar(256)                           null comment '邮箱',
-    `user_avatar`  varchar(256)                          null comment '用户头像',
+    `user_avatar`  varchar(256)                           null comment '用户头像',
     `gender`       tinyint      default 0                 not null comment '0-女 1-男 2',
     `university`   bigint                                 null comment '学校',
     `education`    tinyint                                null comment '学历',
@@ -27,3 +27,15 @@ create table if not exists user
     index idx_username (`username`),
     index idx_email (`email`)
 ) comment '用户' collate = utf8mb4_unicode_ci;
+
+-- 讲师信息表
+create table teacher
+(
+    `teacher_id`  int primary key auto_increment comment '讲师id',
+    `title`       varchar(50)       default null comment '职称',
+    `expertise`   varchar(255)      default null comment '专长领域',
+    `create_time` datetime not null default current_timestamp comment '创建时间',
+    `update_time` datetime not null default current_timestamp on update current_timestamp comment '更新时间',
+    `is_delete`   tinyint           default 0 not null comment '是否删除',
+    index idx_teacher_id (`teacher_id`)
+) comment '讲师信息表' collate = utf8mb4_unicode_ci;
