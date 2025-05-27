@@ -3,6 +3,8 @@ package com.ice.campus.common.auth.interceptor;
 import com.ice.campus.common.auth.client.TokenClient;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
+import com.ice.campus.common.core.constant.ErrorCode;
+import com.ice.campus.common.core.exception.ThrowUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         // 判断 token 是否有效
         UserBasicInfo userBasicInfoVO = tokenClient.checkTokenAndGetUserBasicInfo(accessToken);
+        ThrowUtils.throwIf(userBasicInfoVO == null, ErrorCode.NOT_LOGIN_ERROR);
         // 保存上下文
         SecurityContext.setCurrentUser(userBasicInfoVO);
         return true;

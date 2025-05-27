@@ -2,6 +2,7 @@ package com.ice.campus.common.auth.config;
 
 import com.ice.campus.common.auth.constant.InterceptorConstant;
 import com.ice.campus.common.auth.interceptor.AuthInterceptor;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -13,6 +14,7 @@ import jakarta.annotation.Resource;
  * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>
  * @create 2025/3/10 15:34
  */
+@Component
 public class WebConfig implements WebMvcConfigurer {
     @Resource
     private AuthInterceptor authInterceptor;
