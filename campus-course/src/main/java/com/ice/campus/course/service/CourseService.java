@@ -1,7 +1,9 @@
 package com.ice.campus.course.service;
 
+import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.course.model.entity.Course;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ice.campus.course.model.vo.CourseVO;
 
 /**
 * @author chenjiahan
@@ -10,4 +12,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface CourseService extends IService<Course> {
 
+    BaseResponse<CourseVO> getCourseVOById(Long courseId);
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ice.campus.chat.mapper.ChatRoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.ice.campus.chat.model.entity.ChatRoom">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="roomName" column="room_name" jdbcType="VARCHAR"/>
+            <result property="roomType" column="room_type" jdbcType="TINYINT"/>
+            <result property="createUserId" column="create_user_id" jdbcType="BIGINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,room_name,room_type,
+        create_user_id,create_time,update_time,
+        is_delete
+    </sql>
+</mapper>

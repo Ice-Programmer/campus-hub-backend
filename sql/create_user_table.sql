@@ -41,6 +41,47 @@ create table if not exists teacher
     index idx_teacher_id (`user_id`)
 ) comment '讲师信息表' collate = utf8mb4_unicode_ci;
 
+-- 聊天室表
+create table if not exists chat_room
+(
+    `id`             bigint auto_increment comment 'id' primary key,
+    `room_name`      varchar(255)                       not null comment '聊天室名称',
+    `room_type`      tinyint  default 0                 not null comment '聊天室类型',
+    `create_user_id` bigint                             not null comment '创建用户 id',
+    `create_time`    datetime default current_timestamp not null comment '创建时间',
+    `update_time`    datetime default current_timestamp not null on update current_timestamp comment '更新时间',
+    `is_delete`      tinyint  default 0                 not null comment '是否删除',
+    index idx_create_user_id (`create_user_id`)
+) comment '聊天室表' collate = utf8mb4_unicode_ci;
+
+-- 聊天成员表
+create table if not exists chat_room_member
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `room_id`     bigint                             not null comment '聊天室 id',
+    `user_id`     bigint                             not null comment '用户 id',
+    `create_time` datetime default current_timestamp not null comment '创建时间（加入时间）',
+    `update_time` datetime default current_timestamp not null on update current_timestamp comment '更新时间',
+    `is_delete`   tinyint  default 0                 not null comment '是否删除',
+    unique (`room_id`, `user_id`)
+) comment '聊天室表' collate = utf8mb4_unicode_ci;
+
+-- 消息存储表
+create table if not exists chat_message
+(
+    `id`               bigint auto_increment comment 'id' primary key,
+    `room_id`          bigint                                not null comment '聊天室 id',
+    `user_id`          bigint                                not null comment '用户 id',
+    `content_type`     varchar(50) default 'text'            not null comment '内容类型(text, image, file, emoji)',
+    `content`          varchar(1024)                         not null comment '消息内容',
+    `reply_message_id` bigint                                null comment '回复消息 id',
+    `create_time`      datetime    default current_timestamp not null comment '创建时间（加入时间）',
+    `update_time`      datetime    default current_timestamp not null on update current_timestamp comment '更新时间',
+    `is_delete`        tinyint     default 0                 not null comment '是否删除',
+    index idx_room_id (`room_id`),
+    index idx_user_id (`user_id`)
+) comment '聊天消息存储表' collate = utf8mb4_unicode_ci;
+
 -- 插入用户数据
 INSERT INTO user (username, email, user_avatar, gender, university, education, user_profile, birthday, city, role)
 VALUES

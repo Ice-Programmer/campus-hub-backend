@@ -18,7 +18,7 @@ public class CourseCategory implements Serializable {
     /**
      * 分类id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**

@@ -14,6 +14,8 @@
         <module>campus-biz</module>
         <module>campus-post</module>
         <module>campus-course</module>
+        <module>campus-api</module>
+        <module>campus-chat</module>
     </modules>
 
     <properties>
@@ -28,9 +30,9 @@
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <jjwt-version>0.12.5</jjwt-version>
         <hutool-version>5.8.26</hutool-version>
-        <dubbo.version>3.3.0</dubbo.version>
         <nacos.version>2.1.2</nacos.version>
         <jts-version>1.19.0</jts-version>
+        <dubbo.version>3.3.0</dubbo.version>
     </properties>
 
     <dependencyManagement>
@@ -81,13 +83,6 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo-bom</artifactId>
-                <version>${dubbo.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.locationtech.jts/jts-core -->
             <dependency>
