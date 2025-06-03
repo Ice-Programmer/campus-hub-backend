@@ -1,6 +1,5 @@
 package com.ice.campus.user.mapper;
 
-import com.ice.campus.user.api.TeacherBasicInfo;
 import com.ice.campus.user.model.entity.Teacher;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -11,8 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.ice.campus.user.model.entity.Teacher
 */
 public interface TeacherMapper extends BaseMapper<Teacher> {
-
-    TeacherBasicInfo getTeacherBasicInfoByUserId();
 }
 
 
