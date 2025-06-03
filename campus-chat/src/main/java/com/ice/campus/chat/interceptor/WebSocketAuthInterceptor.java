@@ -1,6 +1,7 @@
 package com.ice.campus.chat.interceptor;
 
 import com.ice.campus.chat.service.ChatRoomMemberService;
+import com.ice.campus.chat.websocket.WebsocketConstant;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
 import jakarta.annotation.Resource;
@@ -31,8 +32,12 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         if (request instanceof ServletServerHttpRequest) {
             HttpServletRequest httpServletRequest = ((ServletServerHttpRequest) request).getServletRequest();
-            // 从请求中获取参数
-            String roomIdStr = httpServletRequest.getParameter("roomId");
+
+            // 从URI路径中提取聊天室ID
+            String path = httpServletRequest.getRequestURI();
+            String[] pathSegments = path.split("/");
+            String roomIdStr = pathSegments[pathSegments.length - 1];
+
             if (StringUtils.isBlank(roomIdStr)) {
                 log.error("房间号缺失，拒绝握手");
                 return false;
@@ -50,9 +55,12 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 return false;
             }
             // 设置用户登录信息等属性到 WebSocket 会话中
-            attributes.put("currentUser", currentUser);
-            attributes.put("userId", currentUser.getId());
-            attributes.put("roomId", roomId);
+            attributes.put(WebsocketConstant.CURRENT_USER_INFO_KEY, currentUser);
+            attributes.put(WebsocketConstant.USER_ID_KEY, currentUser.getId());
+            attributes.put(WebsocketConstant.ROOM_ID_KEY, roomId);
+            
+            log.info("用户[{}]成功通过WebSocket握手验证，准备连接聊天室[{}]", currentUser.getUsername(), roomId);
+            return true;
         }
         return false;
     }

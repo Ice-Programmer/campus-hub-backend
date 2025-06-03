@@ -82,6 +82,19 @@ create table if not exists chat_message
     index idx_user_id (`user_id`)
 ) comment '聊天消息存储表' collate = utf8mb4_unicode_ci;
 
+-- 消息已读表
+create table if not exists chat_message_read
+(
+    `id`         bigint auto_increment comment 'id' primary key,
+    `message_id` bigint                             not null comment '消息ID',
+    `user_id`    bigint                             not null comment '用户ID',
+    `room_id`    bigint                             not null comment '聊天室ID',
+    `read_time`  datetime default current_timestamp null comment '已读时间',
+    index idx_message_id (`message_id`),
+    index idx_user_id (`user_id`),
+    index idx_room_id (`room_id`)
+) comment ='聊天消息已读记录表' collate = utf8mb4_unicode_ci;
+
 -- 插入用户数据
 INSERT INTO user (username, email, user_avatar, gender, university, education, user_profile, birthday, city, role)
 VALUES
