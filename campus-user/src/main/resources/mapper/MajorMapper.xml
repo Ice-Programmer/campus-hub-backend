@@ -6,7 +6,7 @@
 
     <resultMap id="BaseResultMap" type="com.ice.campus.user.model.entity.Major">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="majorMame" column="major_mame" jdbcType="VARCHAR"/>
+            <result property="majorName" column="major_mame" jdbcType="VARCHAR"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>

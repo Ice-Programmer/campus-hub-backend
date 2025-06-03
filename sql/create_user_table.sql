@@ -63,7 +63,7 @@ create table if not exists student_awards
 create table if not exists major
 (
     `id`          bigint auto_increment comment 'id' primary key,
-    `major_mame`  varchar(256)                       not null comment '专业名称',
+    `major_name`  varchar(256)                       not null comment '专业名称',
     `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     `update_time` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     `is_delete`   tinyint  default 0                 not null comment '是否删除'

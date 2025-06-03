@@ -22,7 +22,7 @@ public class Major implements Serializable {
     /**
      * 专业名称
      */
-    private String majorMame;
+    private String majorName;
 
     /**
      * 创建时间
