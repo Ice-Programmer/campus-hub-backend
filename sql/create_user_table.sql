@@ -28,6 +28,58 @@ create table if not exists user
     index idx_email (`email`)
 ) comment '用户' collate = utf8mb4_unicode_ci;
 
+-- 学生表
+create table if not exists student
+(
+    `id`              bigint auto_increment comment 'id' primary key,
+    `user_id`         bigint                             null comment '用户id',
+    `student_grade`   int      default 1                 not null comment '学生年级',
+    `school_id`       bigint                             not null comment '学校 id',
+    `student_major`   bigint                             null comment '学生专业',
+    `enrollment_year` year                               null comment '入学年份',
+    `graduation_year` year                               null comment '预计毕业年份',
+    `status`          tinyint  default 1                 not null comment '学生状态:1-在读 2-休学 3-毕业 4-退学',
+    `create_time`     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time`     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`       tinyint  default 0                 not null comment '是否删除',
+    index idx_user_id (`user_id`),
+    index idx_school_id (`school_id`)
+) comment '学生' collate = utf8mb4_unicode_ci;
+
+-- 获奖经历
+create table if not exists student_awards
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `user_id`     bigint                             null comment '用户id',
+    `award_name`  varchar(1024)                      not null comment '奖项名称',
+    `award_time`  datetime                           not null comment '获奖时间',
+    `description` varchar(1024)                      not null comment '简要介绍',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`   tinyint  default 0                 not null comment '是否删除'
+) comment '学生经历' collate = utf8mb4_unicode_ci;
+
+-- 专业表
+create table if not exists major
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `major_mame`  varchar(256)                       not null comment '专业名称',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`   tinyint  default 0                 not null comment '是否删除'
+) comment '专业' collate = utf8mb4_unicode_ci;
+
+-- 学校表
+create table if not exists school
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `school_name` varchar(256)                       not null comment '学校名称',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`   tinyint  default 0                 not null comment '是否删除'
+) comment '学校' collate = utf8mb4_unicode_ci;
+
+
 -- 讲师信息表
 create table if not exists teacher
 (
