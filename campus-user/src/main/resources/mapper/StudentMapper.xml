@@ -7,9 +7,9 @@
     <resultMap id="BaseResultMap" type="com.ice.campus.user.model.entity.Student">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="studentGrade" column="student_grade" jdbcType="INTEGER"/>
+            <result property="studentDegree" column="student_degree" jdbcType="INTEGER"/>
             <result property="schoolId" column="school_id" jdbcType="BIGINT"/>
-            <result property="studentMajor" column="student_major" jdbcType="BIGINT"/>
+            <result property="majorId" column="major_id" jdbcType="BIGINT"/>
             <result property="enrollmentYear" column="enrollment_year" jdbcType="OTHER"/>
             <result property="graduationYear" column="graduation_year" jdbcType="OTHER"/>
             <result property="status" column="status" jdbcType="TINYINT"/>
@@ -19,8 +19,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,user_id,student_grade,
-        school_id,student_major,enrollment_year,
+        id,user_id,student_degree,
+        school_id,major_id,enrollment_year,
         graduation_year,status,create_time,
         update_time,is_delete
     </sql>

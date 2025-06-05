@@ -33,9 +33,9 @@ create table if not exists student
 (
     `id`              bigint auto_increment comment 'id' primary key,
     `user_id`         bigint                             null comment '用户id',
-    `student_grade`   int      default 1                 not null comment '学生年级',
+    `student_grade`   int      default 1                 not null comment '学生学历',
     `school_id`       bigint                             not null comment '学校 id',
-    `student_major`   bigint                             null comment '学生专业',
+    `major_id`        bigint                             not null comment '专业 id',
     `enrollment_year` year                               null comment '入学年份',
     `graduation_year` year                               null comment '预计毕业年份',
     `status`          tinyint  default 1                 not null comment '学生状态:1-在读 2-休学 3-毕业 4-退学',

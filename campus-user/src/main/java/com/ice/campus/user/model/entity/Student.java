@@ -2,6 +2,7 @@ package com.ice.campus.user.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -29,7 +30,7 @@ public class Student implements Serializable {
     /**
      * 学生年级
      */
-    private Integer studentGrade;
+    private Integer studentDegree;
 
     /**
      * 学校 id
@@ -39,7 +40,7 @@ public class Student implements Serializable {
     /**
      * 学生专业
      */
-    private Long studentMajor;
+    private Long majorId;
 
     /**
      * 入学年份
@@ -73,5 +74,6 @@ public class Student implements Serializable {
     private Integer isDelete;
 
     @TableField(exist = false)
+    @Serial
     private static final long serialVersionUID = 1L;
 }
