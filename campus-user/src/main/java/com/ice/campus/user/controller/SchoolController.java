@@ -41,11 +41,7 @@ public class SchoolController {
     @IgnoreAuth
     @GetMapping("/list")
     public BaseResponse<List<SchoolVO>> getSchoolList() {
-        List<SchoolVO> schoolVOList = schoolService.list(Wrappers.<School>lambdaQuery()
-                        .select(School::getId, School::getSchoolName)).stream()
-                .map(SchoolVO::objToVO)
-                .toList();
-        return ResultUtils.success(schoolVOList);
+        return ResultUtils.success(schoolService.getSchoolList());
     }
 
     /**

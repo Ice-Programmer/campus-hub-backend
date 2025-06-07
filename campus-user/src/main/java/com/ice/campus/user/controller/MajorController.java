@@ -41,11 +41,7 @@ public class MajorController {
     @IgnoreAuth
     @GetMapping("/list")
     public BaseResponse<List<MajorVO>> getMajorList() {
-        List<MajorVO> majorVOList = majorService.list(Wrappers.<Major>lambdaQuery()
-                        .select(Major::getId, Major::getMajorName)).stream()
-                .map(MajorVO::objToVO)
-                .toList();
-        return ResultUtils.success(majorVOList);
+        return ResultUtils.success(majorService.getMajorList());
     }
 
     /**
