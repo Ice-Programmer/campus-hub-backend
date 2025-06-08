@@ -28,6 +28,33 @@ create table if not exists user
     index idx_email (`email`)
 ) comment '用户' collate = utf8mb4_unicode_ci;
 
+-- 标签表
+create table if not exists tag
+(
+    `id`             bigint auto_increment comment 'id' primary key,
+    `tag_name`       varchar(126)                       not null comment '标签名称',
+    `create_user_id` bigint                             not null comment '创建用户 id',
+    `status`         tinyint  default 0                 not null comment '0-待审核 1-已审核 2-已拒绝',
+    `is_official`    tinyint  default 0                 not null comment '是否官方标签(0 - 非 1 - 是)',
+    `usage_count`    int      default 0                 not null comment '使用次数',
+    `create_time`    datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time`    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`      tinyint  default 0                 not null comment '是否删除',
+    unique key uk_tag_name (`tag_name`)
+) comment '标签表' collate = utf8mb4_unicode_ci;
+
+-- 用户标签表
+create table if not exists user_tag
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `user_id`     bigint                             null comment '用户 id',
+    `tag_id`      bigint                             null comment '标签 id',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    unique key uk_user_tag (`user_id`, `tag_id`),
+    index idx_user_id (`user_id`),
+    index idx_tag_id (`tag_id`)
+) comment '用户标签关联表' collate = utf8mb4_unicode_ci;
+
 -- 学生表
 create table if not exists student
 (
