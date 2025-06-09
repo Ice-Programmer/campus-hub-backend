@@ -19,7 +19,6 @@ create table if not exists user
     `city`         bigint                                 null comment '城市',
     `followee_num` int unsigned default 0                 not null comment '粉丝数',
     `follow_num`   int unsigned default 0                 not null comment '关注数',
-    `role`         varchar(128) default 'user'            not null comment '用户角色：user/admin/ban',
     `create_time`  datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
     `update_time`  datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     `is_delete`    tinyint      default 0                 not null comment '是否删除',
@@ -27,6 +26,66 @@ create table if not exists user
     index idx_username (`username`),
     index idx_email (`email`)
 ) comment '用户' collate = utf8mb4_unicode_ci;
+
+-- 角色表
+create table if not exists role
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `role_code`   varchar(50)                        not null comment '角色编码',
+    `role_name`   varchar(128)                       not null comment '角色名称',
+    `description` varchar(256)                       null comment '角色描述',
+    `status`      tinyint                            not null default 1 comment '状态 0-禁用 1-启用',
+    `is_system`   tinyint                            not null default 0 comment '是否系统内置角色 0-否 1-是',
+    `data_scope`  tinyint  default 5                 not null COMMENT '数据权限范围 1-全部数据 2-自定义数据 3-本学校数据 4-本学校及以下 5-仅本人数据',
+    `sort_order`  int      default 0                 not null comment '排序',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time` datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`   tinyint  default 0                 not null comment '是否删除',
+    unique key `idx_role_code` (`role_code`),
+    key `idx_role_name` (`role_name`)
+) comment '角色' collate = utf8mb4_unicode_ci;
+
+-- 权限表
+create table if not exists permission
+(
+    `id`              bigint auto_increment comment 'id' primary key,
+    `permission_code` varchar(128)                       not null comment '权限编码',
+    `permission_name` varchar(128)                       not null comment '权限名称',
+    `parent_id`       bigint                             null comment '父权限 id',
+    `status`          tinyint                            not null default 1 comment '状态 0-禁用 1-启用',
+    `is_system`       int                                not null default 0 comment '是否系统内置权限 0-否 1-是',
+    `description`     varchar(256)                       null comment '权限描述',
+    `sort_order`      int      default 0                 not null comment '排序',
+    `create_time`     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    `update_time`     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    `is_delete`       tinyint  default 0                 not null comment '是否删除',
+    unique key `idx_permission_code` (`permission_code`),
+    key `idx_parent_id` (`parent_id`)
+) comment '权限' collate = utf8mb4_unicode_ci;
+
+-- 用户角色关联表
+create table if not exists user_role
+(
+    `id`          bigint auto_increment comment 'id' primary key,
+    `user_id`     bigint                             not null comment '用户 id',
+    `role_id`     bigint                             not null comment '角色 id',
+    `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    unique key `uk_user_role` (`user_id`, `role_id`),
+    index `idx_user_id` (`user_id`),
+    index `idx_role_id` (`role_id`)
+) comment '用户角色关联' collate = utf8mb4_unicode_ci;
+
+-- 角色权限关联表
+create table if not exists role_permission
+(
+    `id`            bigint auto_increment comment 'id' primary key,
+    `role_id`       bigint                             not null comment '角色 id',
+    `permission_id` bigint                             not null comment '权限 id',
+    `create_time`   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    unique key `uk_role_permission` (`role_id`, `permission_id`),
+    index `idx_role_id` (`role_id`),
+    index `idx_permission_id` (`permission_id`)
+) comment '角色权限关联' collate = utf8mb4_unicode_ci;
 
 -- 标签表
 create table if not exists tag
@@ -47,8 +106,8 @@ create table if not exists tag
 create table if not exists user_tag
 (
     `id`          bigint auto_increment comment 'id' primary key,
-    `user_id`     bigint                             null comment '用户 id',
-    `tag_id`      bigint                             null comment '标签 id',
+    `user_id`     bigint                             not null comment '用户 id',
+    `tag_id`      bigint                             not null comment '标签 id',
     `create_time` datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     unique key uk_user_tag (`user_id`, `tag_id`),
     index idx_user_id (`user_id`),
@@ -173,20 +232,3 @@ create table if not exists chat_message_read
     index idx_user_id (`user_id`),
     index idx_room_id (`room_id`)
 ) comment ='聊天消息已读记录表' collate = utf8mb4_unicode_ci;
-
--- 插入用户数据
-INSERT INTO user (username, email, user_avatar, gender, university, education, user_profile, birthday, city, role)
-VALUES
-    -- 教师用户
-    ('陈教授', 'chen.prof@example.com', 'https://example.com/avatar4.jpg', 1, 1, 4, '从事计算机科学教育20年',
-     '1975-08-10', 1, 'teacher'),
-    ('林博士', 'lin.dr@example.com', 'https://example.com/avatar5.jpg', 0, 2, 4, '人工智能与机器学习专家', '1980-12-25',
-     2, 'teacher'),
-    ('黄讲师', 'huang.lecturer@example.com', 'https://example.com/avatar6.jpg', 1, 3, 3, '专注Web开发技术教学',
-     '1985-06-30', 3, 'teacher');
-
--- 插入教师信息数据
-INSERT INTO teacher (user_id, title, expertise)
-VALUES (4, '教授', '计算机体系结构,操作系统,分布式系统'),
-       (5, '副教授', '机器学习,深度学习,计算机视觉'),
-       (6, '讲师', 'Web前端开发,后端架构,数据库设计');

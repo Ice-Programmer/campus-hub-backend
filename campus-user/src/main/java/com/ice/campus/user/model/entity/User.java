@@ -28,11 +28,6 @@ public class User implements Serializable {
     private String username;
 
     /**
-     * 手机号（加密）
-     */
-    private String phone;
-
-    /**
      * 邮箱
      */
     private String email;
@@ -81,11 +76,6 @@ public class User implements Serializable {
      * 关注数
      */
     private Integer followNum;
-
-    /**
-     * 用户角色：user/admin/ban
-     */
-    private String role;
 
     /**
      * 创建时间

@@ -9,6 +9,7 @@ import com.ice.campus.common.core.exception.ThrowUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,6 +24,7 @@ import java.lang.reflect.Method;
  */
 @Slf4j
 @Component
+@Order(0)
 public class AuthInterceptor implements HandlerInterceptor {
 
     @Resource
