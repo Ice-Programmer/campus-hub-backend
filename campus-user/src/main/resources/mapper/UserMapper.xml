@@ -5,29 +5,57 @@
 <mapper namespace="com.ice.campus.user.mapper.UserMapper">
 
     <resultMap id="BaseResultMap" type="com.ice.campus.user.model.entity.User">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="username" column="username" jdbcType="VARCHAR"/>
-            <result property="email" column="email" jdbcType="VARCHAR"/>
-            <result property="userAvatar" column="user_avatar" jdbcType="VARCHAR"/>
-            <result property="gender" column="gender" jdbcType="TINYINT"/>
-            <result property="university" column="university" jdbcType="BIGINT"/>
-            <result property="education" column="education" jdbcType="TINYINT"/>
-            <result property="userProfile" column="user_profile" jdbcType="VARCHAR"/>
-            <result property="birthday" column="birthday" jdbcType="DATE"/>
-            <result property="city" column="city" jdbcType="BIGINT"/>
-            <result property="followeeNum" column="followee_num" jdbcType="INTEGER"/>
-            <result property="followNum" column="follow_num" jdbcType="INTEGER"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="email" column="email" jdbcType="VARCHAR"/>
+        <result property="userAvatar" column="user_avatar" jdbcType="VARCHAR"/>
+        <result property="gender" column="gender" jdbcType="TINYINT"/>
+        <result property="university" column="university" jdbcType="BIGINT"/>
+        <result property="education" column="education" jdbcType="TINYINT"/>
+        <result property="userProfile" column="user_profile" jdbcType="VARCHAR"/>
+        <result property="birthday" column="birthday" jdbcType="DATE"/>
+        <result property="city" column="city" jdbcType="BIGINT"/>
+        <result property="followeeNum" column="followee_num" jdbcType="INTEGER"/>
+        <result property="followNum" column="follow_num" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,username,
-        email,user_avatar,gender,
-        university,education,user_profile,
-        birthday,city,followeeNum,
-        followNum,create_time,
-        update_time,is_delete
-    </sql>
+    <resultMap id="UserBasicInfoMap" type="com.ice.campus.common.auth.vo.UserBasicInfo">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="email" column="email"/>
+        <result property="role" column="role"/>
+        <result property="dataScope" column="data_scope"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="createTime" column="create_time"/>
+        <collection property="permissions" ofType="string">
+            <result column="permission_code"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserBasicInfoByEmail" resultMap="UserBasicInfoMap">
+        select u.id,
+               u.username,
+               u.user_avatar,
+               u.email,
+               r.role_code  as role,
+               r.data_scope,
+               u.university as school_id,
+               u.create_time,
+               p.permission_code
+        from user u
+                 left join user_role ur on u.id = ur.user_id
+                 left join role r on ur.role_id = r.id
+                 left join role_permission rp on r.id = rp.role_id
+                 left join permission p on rp.permission_id = p.id
+        where u.email = #{email}
+          and u.is_delete = 0
+          and (r.is_delete = 0 or r.id is null)
+          and (p.is_delete = 0 or p.id is null)
+          and (r.status = 1 or r.id is null)
+          and (p.status = 1 or p.id is null);
+    </select>
 </mapper>

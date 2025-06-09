@@ -1,7 +1,9 @@
 package com.ice.campus.user.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ice.campus.common.auth.annotation.CheckPermission;
 import com.ice.campus.common.auth.annotation.IgnoreAuth;
+import com.ice.campus.common.auth.enums.PermissionEnum;
 import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.DeleteRequest;
 import com.ice.campus.common.core.common.ResultUtils;

@@ -47,15 +47,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 2. 判断用户是否存在
-        User user = baseMapper.selectOne(Wrappers.<User>lambdaQuery()
-                .eq(User::getEmail, email)
-                .select(User::getId, User::getUsername, User::getUserAvatar, User::getRole, User::getCreateTime)
-                .last(DatabaseConstant.LIMIT_ONE));
+        UserBasicInfo userBasicInfo = baseMapper.getUserBasicInfoByEmail(email);
 
         // 2.1 不存在新用户插入数据库
-        if (ObjectUtils.isEmpty(user)) {
+        if (ObjectUtils.isEmpty(userBasicInfo)) {
             // todo 线程安全问题
-            user = new User();
+            User user = new User();
             user.setEmail(email);
             user.setUsername(UserConstant.generateUniqueUsername());
             user.setUserAvatar(UserConstant.getRandomUserAvatar());
@@ -67,14 +64,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 3. 判断用户是否被 ban
-        if (UserRoleConstant.BAN.equals(user.getRole())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "用户当前已禁用，请联系管理员");
-        }
+//        if (UserRoleConstant.BAN.equals(user.getRole())) {
+//            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "用户当前已禁用，请联系管理员");
+//        }
 
         // 4. 填充基础信息
-        UserBasicInfo userBasicInfo = new UserBasicInfo();
-        BeanUtils.copyProperties(user, userBasicInfo);
-        userBasicInfo.setEmail(email);
         return userBasicInfo;
     }
 }

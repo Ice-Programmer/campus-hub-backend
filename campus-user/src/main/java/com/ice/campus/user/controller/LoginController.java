@@ -1,5 +1,6 @@
 package com.ice.campus.user.controller;
 
+import com.ice.campus.common.auth.annotation.IgnoreAuth;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.ResultUtils;
@@ -41,6 +42,7 @@ public class LoginController {
 
 
     @PostMapping("/mail")
+    @IgnoreAuth
     public BaseResponse<TokenVO> userLoginByMail(@RequestBody UserMailLoginRequest userMailLoginRequest,
                                                  HttpServletRequest request) {
         if (userMailLoginRequest == null) {
