@@ -16,6 +16,8 @@
         <module>campus-course</module>
         <module>campus-api</module>
         <module>campus-chat</module>
+        <module>campus-team</module>
+        <module>campus-shop</module>
     </modules>
 
     <properties>
