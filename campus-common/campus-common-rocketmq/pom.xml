@@ -5,23 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ice</groupId>
-        <artifactId>campus-hub-backend</artifactId>
+        <artifactId>campus-common</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>campus-common</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>campus-common-core</module>
-        <module>campus-common-cache</module>
-        <module>campus-common-auth</module>
-        <module>campus-common-dubbo</module>
-        <module>campus-common-rocketmq</module>
-    </modules>
+    <artifactId>campus-common-rocketmq</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
 </project>

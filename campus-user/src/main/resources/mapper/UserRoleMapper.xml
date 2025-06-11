@@ -11,8 +11,4 @@
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,user_id,role_id,
-        create_time
-    </sql>
 </mapper>
