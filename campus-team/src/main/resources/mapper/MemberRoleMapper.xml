@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ice.campus.team.mapper.MemberRoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.ice.campus.team.model.entity.MemberRole">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="createUserId" column="create_user_id" jdbcType="BIGINT"/>
+            <result property="teamId" column="team_id" jdbcType="BIGINT"/>
+            <result property="description" column="description" jdbcType="VARCHAR"/>
+            <result property="isOfficial" column="is_official" jdbcType="TINYINT"/>
+            <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,create_user_id,team_id,
+        description,is_official,role_name,
+        create_time,update_time,is_delete
+    </sql>
+</mapper>

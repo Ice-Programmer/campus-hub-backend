@@ -54,6 +54,23 @@ public enum PermissionEnum implements BaseEnum<String> {
      */
     POST_DELETE("post:delete", "删除帖子"),
 
+    // ==================== 队伍管理权限 ====================
+
+    /**
+     * 队伍管理权限
+     */
+    TEAM_MANAGE("team:manage", "队伍管理"),
+
+    /**
+     * 创建队伍权限
+     */
+    TEAM_CREATE("team:create", "创建队伍"),
+
+    /**
+     * 解散队伍权限
+     */
+    POST_DISBAND("team:disband", "解散队伍"),
+
     // ==================== 其他功能权限 ====================
     /**
      * 查看仪表板权限
