@@ -3,6 +3,7 @@ package com.ice.campus.team.service;
 import com.ice.campus.team.model.entity.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
+import com.ice.campus.team.model.request.team.TeamEditRequest;
 import jakarta.validation.Valid;
 
 /**
@@ -28,4 +29,12 @@ public interface TeamService extends IService<Team> {
      * @return 创建队伍 id
      */
     Long createTeam(TeamCreateRequest teamCreateRequest);
+
+    /**
+     * 编辑队伍
+     *
+     * @param teamEditRequest 队伍编辑请求
+     * @return 编辑成功
+     */
+    boolean editTeam(TeamEditRequest teamEditRequest);
 }

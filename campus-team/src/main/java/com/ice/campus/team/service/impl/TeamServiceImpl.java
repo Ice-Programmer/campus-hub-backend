@@ -19,6 +19,7 @@ import com.ice.campus.team.model.enums.TeamCommonMemberEnum;
 import com.ice.campus.team.model.enums.TeamMemberStatusEnum;
 import com.ice.campus.team.model.enums.TeamStatusEnum;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
+import com.ice.campus.team.model.request.team.TeamEditRequest;
 import com.ice.campus.team.service.TeamService;
 import com.ice.campus.team.mapper.TeamMapper;
 import jakarta.annotation.Resource;
@@ -87,6 +88,35 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                     throw new BusinessException(ErrorCode.OPERATION_ERROR, "请勿重复操作");
                 }
         );
+    }
+
+    @Override
+    public boolean editTeam(TeamEditRequest teamEditRequest) {
+        // 校验队伍是否存在
+        UserBasicInfo currentUser = SecurityContext.getCurrentUser();
+        Long teamId = teamEditRequest.getId();
+        Team team = baseMapper.selectOne(Wrappers.<Team>lambdaQuery()
+                .eq(Team::getCreatorId, currentUser.getId())
+                .eq(Team::getId, teamId)
+                .select(Team::getCurrentMembers)
+                .last(DatabaseConstant.LIMIT_ONE));
+        ThrowUtils.throwIf(ObjectUtils.isEmpty(team), ErrorCode.NOT_FOUND_ERROR, "队伍信息不存在！");
+
+        // 校验人数是否少于当前人数
+        if (team.getCurrentMembers() > teamEditRequest.getMaxMembers()) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "修改最大人数不得低于当前队伍人数！");
+        }
+
+        BeanUtils.copyProperties(teamEditRequest, team);
+        team.setTags(GSON.toJson(teamEditRequest.getTagList()));
+        try {
+            baseMapper.updateById(team);
+        } catch (Exception e) {
+            log.error("修改队伍失败，队伍 id：{}，修改用户：{}", teamId, currentUser.getId());
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "修改队伍失败！请重试");
+        }
+        log.info("修改队伍成功，队伍 id：{}，修改用户：{}", teamId, currentUser.getId());
+        return true;
     }
 
 

@@ -5,6 +5,7 @@ import com.ice.campus.common.auth.enums.PermissionEnum;
 import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.ResultUtils;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
+import com.ice.campus.team.model.request.team.TeamEditRequest;
 import com.ice.campus.team.service.TeamService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -36,5 +37,16 @@ public class TeamController {
     @CheckPermission(PermissionEnum.TEAM_CREATE)
     public BaseResponse<Long> createTeam(@RequestBody @Valid TeamCreateRequest teamCreateRequest) {
         return ResultUtils.success(teamService.createTeam(teamCreateRequest));
+    }
+
+    /**
+     * 编辑队伍
+     *
+     * @param teamEditRequest 队伍编辑请求
+     * @return 编辑成功
+     */
+    @PostMapping("/edit")
+    public BaseResponse<Boolean> editTeam(@RequestBody @Valid TeamEditRequest teamEditRequest) {
+        return ResultUtils.success(teamService.editTeam(teamEditRequest));
     }
 }
