@@ -2,6 +2,8 @@ package com.ice.campus.team.service;
 
 import com.ice.campus.team.model.entity.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ice.campus.team.model.request.team.TeamCreateRequest;
+import jakarta.validation.Valid;
 
 /**
  * @author chenjiahan
@@ -19,4 +21,11 @@ public interface TeamService extends IService<Team> {
      */
     boolean isTeamCreatorOrManager(Long teamId, Long userId);
 
+    /**
+     * 创建队伍
+     *
+     * @param teamCreateRequest 队伍创建请求
+     * @return 创建队伍 id
+     */
+    Long createTeam(TeamCreateRequest teamCreateRequest);
 }

@@ -12,23 +12,22 @@ import java.util.Set;
  * @create 2025/6/11 21:00
  */
 @Getter
-public enum TeamCommonMemberEnum implements BaseEnum<Integer> {
+public enum TeamCommonMemberEnum implements BaseEnum<Long> {
 
-    CREATOR("创建者", 1),
-    MANAGER("管理员", 2),
-    MEMBER("队员", 3);
-
+    CREATOR("创建者", 1L),
+    MANAGER("管理员", 2L),
+    MEMBER("队员", 3L);
 
     private final String text;
 
-    private final Integer value;
+    private final Long value;
 
-    private TeamCommonMemberEnum(String text, Integer value) {
+    TeamCommonMemberEnum(String text, Long value) {
         this.text = text;
         this.value = value;
     }
 
-    public static Set<Integer> getCreatorAndManagerValueSet() {
+    public static Set<Long> getCreatorAndManagerValueSet() {
         return Set.of(TeamCommonMemberEnum.CREATOR.getValue(), TeamCommonMemberEnum.MANAGER.getValue());
     }
 }

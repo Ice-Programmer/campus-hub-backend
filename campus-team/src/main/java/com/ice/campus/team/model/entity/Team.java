@@ -5,13 +5,15 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+
 import lombok.Data;
 
 /**
  * 队伍表
+ *
  * @TableName team
  */
-@TableName(value ="team")
+@TableName(value = "team")
 @Data
 public class Team implements Serializable {
     /**
@@ -33,7 +35,7 @@ public class Team implements Serializable {
     /**
      * 队长用户id
      */
-    private Long leaderId;
+    private Long creatorId;
 
     /**
      * 最大成员数
@@ -46,12 +48,12 @@ public class Team implements Serializable {
     private Integer currentMembers;
 
     /**
-     * 队伍类型：1-学习小组，2-项目团队，3-竞赛队伍，4-社团组织
+     * 队伍类型：1-学习小组，2-项目团队，3-竞赛队伍，4-社团组织，5-兴趣小组
      */
     private Integer teamType;
 
     /**
-     * 状态：0-解散，1-招募中，2-活动中，3-停止招募
+     * 状态：0-审批中，1-招募中，2-活动中，3-停止招募，4-封禁中，5-审批失败
      */
     private Integer status;
 
@@ -61,7 +63,7 @@ public class Team implements Serializable {
     private Integer isPublic;
 
     /**
-     * 加入是否需要审批
+     * 加入是否需要审批（0-不需要，1-需要）
      */
     private Integer isApply;
 
