@@ -3,7 +3,7 @@ package com.ice.campus.api.user.service;
 
 import com.ice.campus.api.user.bo.UserBasicInfoBO;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * 用户基础信息调用 - RPC 接口
@@ -27,5 +27,5 @@ public interface UserBasicRpcService {
      * @param userIds 用户 id 列表
      * @return 用户基础信息列表
      */
-    List<UserBasicInfoBO> getBatchUserBasicInfoByUserIds(List<Long> userIds);
+    Set<UserBasicInfoBO> getBatchUserBasicInfoByUserIds(Set<Long> userIds);
 }

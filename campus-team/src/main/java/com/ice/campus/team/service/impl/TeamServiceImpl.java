@@ -1,6 +1,8 @@
 package com.ice.campus.team.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.ice.campus.api.user.bo.UserBasicInfoBO;
@@ -9,10 +11,13 @@ import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.common.cache.constant.TeamConstant;
 import com.ice.campus.common.cache.manager.LockManager;
+import com.ice.campus.common.core.constant.CommonConstant;
 import com.ice.campus.common.core.constant.DatabaseConstant;
 import com.ice.campus.common.core.constant.ErrorCode;
+import com.ice.campus.common.core.enums.PublicEnum;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.common.core.exception.ThrowUtils;
+import com.ice.campus.common.core.utils.SqlUtils;
 import com.ice.campus.team.constant.TeamCommonConstant;
 import com.ice.campus.team.mapper.TeamMapper;
 import com.ice.campus.team.mapper.TeamMemberMapper;
@@ -23,21 +28,28 @@ import com.ice.campus.team.model.enums.TeamMemberStatusEnum;
 import com.ice.campus.team.model.enums.TeamStatusEnum;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamCreatorVO;
 import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author chenjiahan
@@ -139,6 +151,94 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         TeamCreatorVO teamCreatorVO = TeamCreatorVO.from(creatorInfo);
         teamVO.setCreator(teamCreatorVO);
         return teamVO;
+    }
+
+    @Override
+    public Page<TeamVO> pageTeamVO(TeamQueryRequest teamQueryRequest) {
+        long current = teamQueryRequest.getCurrent();
+        long pageSize = teamQueryRequest.getPageSize();
+
+        // 获取队伍数据分页
+        Page<Team> teamPage = baseMapper.selectPage(new Page<>(current, pageSize), getQueryWrapper(teamQueryRequest));
+        List<Team> teamList = teamPage.getRecords();
+
+        // 获取所有创建者用户 id 集合
+        Set<Long> creatorIdSet = teamList.stream().map(Team::getCreatorId).collect(Collectors.toSet());
+        // 查询所有创建者用户信息集合
+        Set<UserBasicInfoBO> creatorInfoSet = userBasicRpcService.getBatchUserBasicInfoByUserIds(creatorIdSet);
+
+        // 封装成 userId -> UserBasicInfoBO 的 Map
+        Map<Long, UserBasicInfoBO> creatorInfoMap = creatorInfoSet.stream()
+                .collect(Collectors.toMap(UserBasicInfoBO::getId, Function.identity()));
+
+        // 封装队伍信息
+        List<TeamVO> teamVOList = teamList.stream().map(team -> {
+            TeamVO teamVO = TeamVO.objToVO(team);
+            UserBasicInfoBO userBasicInfoBO = creatorInfoMap.get(team.getCreatorId());
+            TeamCreatorVO teamCreatorVO = TeamCreatorVO.from(userBasicInfoBO);
+            teamVO.setCreator(teamCreatorVO);
+            return teamVO;
+        }).toList();
+
+        Page<TeamVO> teamVOPage = new Page<>(teamPage.getCurrent(), teamPage.getSize(), teamPage.getTotal());
+
+        teamVOPage.setRecords(teamVOList);
+        return teamVOPage;
+    }
+
+    public QueryWrapper<Team> getQueryWrapper(TeamQueryRequest teamQueryRequest) {
+        QueryWrapper<Team> wrapper = new QueryWrapper<>();
+        if (teamQueryRequest == null) {
+            return wrapper;
+        }
+        // 根据 id 查询
+        Long id = teamQueryRequest.getId();
+        wrapper.eq(!ObjectUtils.isEmpty(id), "id", id);
+
+        // 根据 id 列表查询
+        List<Long> ids = teamQueryRequest.getIds();
+        wrapper.in(!CollectionUtils.isEmpty(ids), "id", ids);
+
+        // 根据标签名称查询
+        String teamName = teamQueryRequest.getTeamName();
+        wrapper.like(StringUtils.isNotBlank(teamName), "team_name", teamName);
+
+        // 根据创建用户查询
+        Long userId = teamQueryRequest.getCreatorId();
+        wrapper.eq(!ObjectUtils.isEmpty(userId), "creator_id", userId);
+
+        // 根据标签查询
+        String tag = teamQueryRequest.getTag();
+        wrapper.like(StringUtils.isNotBlank(teamName), "tags", tag);
+
+        // 过滤不要 id
+        List<Long> notId = teamQueryRequest.getNotId();
+        wrapper.ne(!CollectionUtils.isEmpty(ids), "id", notId);
+
+        // 设置公开的
+        wrapper.eq("is_public", PublicEnum.PUBLIC.getValue());
+
+        // 根据是否需要申请
+        Integer isApply = teamQueryRequest.getIsApply();
+        wrapper.eq(!ObjectUtils.isEmpty(isApply), "is_apply", isApply);
+
+        // 根据队伍状态
+        Integer status = teamQueryRequest.getStatus();
+        wrapper.eq(!ObjectUtils.isEmpty(status), "status", status);
+
+        // 根据队伍类型
+        Integer teamType = teamQueryRequest.getTeamType();
+        wrapper.eq(!ObjectUtils.isEmpty(teamType), "team_type", teamType);
+
+        // 根据创建者
+        Long creatorId = teamQueryRequest.getCreatorId();
+        wrapper.eq(!ObjectUtils.isEmpty(creatorId), "creator_id", creatorId);
+
+        wrapper.eq("is_delete", false);
+        String sortField = teamQueryRequest.getSortField();
+        String sortOrder = teamQueryRequest.getSortOrder();
+        wrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+        return wrapper;
     }
 
 

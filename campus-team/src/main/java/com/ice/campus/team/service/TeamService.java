@@ -1,11 +1,12 @@
 package com.ice.campus.team.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ice.campus.team.model.entity.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamVO;
-import jakarta.validation.Valid;
 
 /**
  * @author chenjiahan
@@ -46,4 +47,12 @@ public interface TeamService extends IService<Team> {
      * @return 队伍信息
      */
     TeamVO getTeamVOById(Long teamId);
+
+    /**
+     * 获取队伍分页
+     *
+     * @param teamQueryRequest 队伍查询条件
+     * @return 队伍分页
+     */
+    Page<TeamVO> pageTeamVO(TeamQueryRequest teamQueryRequest);
 }

@@ -10,7 +10,7 @@ create table if not exists team
     `id`              bigint auto_increment comment 'id' primary key,
     `team_name`       varchar(128)                       not null comment '队伍名称',
     `description`     text                               null comment '队伍描述',
-    `creator_id`       bigint                             not null comment '队长用户id',
+    `creator_id`      bigint                             not null comment '队长用户id',
     `max_members`     int      default 10                not null comment '最大成员数',
     `current_members` int      default 1                 not null comment '当前成员数',
     `team_type`       tinyint  default 1                 not null comment '队伍类型：1-学习小组，2-项目团队，3-竞赛队伍，4-社团组织，5-兴趣小组',

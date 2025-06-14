@@ -8,7 +8,7 @@ import com.ice.campus.user.mapper.UserMapper;
 import jakarta.annotation.Resource;
 import org.apache.dubbo.config.annotation.DubboService;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>
@@ -29,7 +29,10 @@ public class UserBasicRpcServiceImpl implements UserBasicRpcService {
     }
 
     @Override
-    public List<UserBasicInfoBO> getBatchUserBasicInfoByUserIds(List<Long> userIds) {
-        return List.of();
+    public Set<UserBasicInfoBO> getBatchUserBasicInfoByUserIds(Set<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Set.of();
+        }
+        return userMapper.selectBatchUserBasicInfoByUserIds(userIds);
     }
 }

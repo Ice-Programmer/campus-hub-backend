@@ -1,5 +1,6 @@
 package com.ice.campus.team.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ice.campus.common.auth.annotation.CheckPermission;
 import com.ice.campus.common.auth.enums.PermissionEnum;
 import com.ice.campus.common.core.common.BaseResponse;
@@ -8,6 +9,7 @@ import com.ice.campus.common.core.constant.ErrorCode;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
 import jakarta.annotation.Resource;
@@ -63,5 +65,24 @@ public class TeamController {
         }
 
         return ResultUtils.success(teamService.getTeamVOById(teamId));
+    }
+
+
+    /**
+     * 获取队伍分页
+     *
+     * @param teamQueryRequest 队伍查询条件
+     * @return 队伍分页
+     */
+    @PostMapping("/page/vo")
+    public BaseResponse<Page<TeamVO>> pageTeamVO(@RequestBody @Valid TeamQueryRequest teamQueryRequest) {
+        long pageSize = teamQueryRequest.getPageSize();
+        if (pageSize > 50) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "每页最大不超过50");
+        }
+
+        Page<TeamVO> postVOPage = teamService.pageTeamVO(teamQueryRequest);
+
+        return ResultUtils.success(postVOPage);
     }
 }

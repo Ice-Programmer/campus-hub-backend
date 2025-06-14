@@ -7,6 +7,8 @@ import com.ice.campus.user.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Set;
+
 /**
  * @author chenjiahan
  * @description 针对表【user(用户)】的数据库操作Mapper
@@ -31,4 +33,12 @@ public interface UserMapper extends BaseMapper<User> {
      * @return 用户基础信息
      */
     UserBasicInfoBO selectUserBasicInfoByUserId(@Param("userId") long userId);
+
+    /**
+     * 批量获取用户基础信息
+     *
+     * @param userIds 用户 id 集合
+     * @return 用户基础信息集合
+     */
+    Set<UserBasicInfoBO> selectBatchUserBasicInfoByUserIds(@Param("userIds") Set<Long> userIds);
 }
