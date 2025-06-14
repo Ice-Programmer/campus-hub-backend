@@ -1,10 +1,11 @@
 package com.ice.campus.team.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.ice.campus.team.model.entity.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.ice.campus.team.model.entity.Team;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamJoinRequest;
 import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamVO;
 
@@ -55,4 +56,12 @@ public interface TeamService extends IService<Team> {
      * @return 队伍分页
      */
     Page<TeamVO> pageTeamVO(TeamQueryRequest teamQueryRequest);
+
+    /**
+     * 加入队伍
+     *
+     * @param teamJoinRequest 队伍加入请求
+     * @return 加入成功
+     */
+    Boolean joinTeam(TeamJoinRequest teamJoinRequest);
 }

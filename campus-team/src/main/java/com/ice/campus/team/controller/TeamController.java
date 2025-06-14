@@ -9,6 +9,7 @@ import com.ice.campus.common.core.constant.ErrorCode;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamJoinRequest;
 import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
@@ -48,6 +49,7 @@ public class TeamController {
      * @return 编辑成功
      */
     @PostMapping("/edit")
+    @CheckPermission(PermissionEnum.TEAM_CREATE)
     public BaseResponse<Boolean> editTeam(@RequestBody @Valid TeamEditRequest teamEditRequest) {
         return ResultUtils.success(teamService.editTeam(teamEditRequest));
     }
@@ -84,5 +86,23 @@ public class TeamController {
         Page<TeamVO> postVOPage = teamService.pageTeamVO(teamQueryRequest);
 
         return ResultUtils.success(postVOPage);
+    }
+
+    /**
+     * 加入队伍
+     *
+     * @param teamJoinRequest 队伍加入请求
+     * @return 加入成功
+     */
+    @CheckPermission(PermissionEnum.TEAM_JOIN)
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody @Valid TeamJoinRequest teamJoinRequest) {
+        if (teamJoinRequest == null || teamJoinRequest.getTeamId() == null || teamJoinRequest.getTeamId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        Boolean result = teamService.joinTeam(teamJoinRequest);
+
+        return ResultUtils.success(result);
     }
 }

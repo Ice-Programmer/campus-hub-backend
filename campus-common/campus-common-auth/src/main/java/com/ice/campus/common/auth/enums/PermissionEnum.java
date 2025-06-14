@@ -69,7 +69,12 @@ public enum PermissionEnum implements BaseEnum<String> {
     /**
      * 解散队伍权限
      */
-    POST_DISBAND("team:disband", "解散队伍"),
+    TEAM_DISBAND("team:disband", "解散队伍"),
+
+    /**
+     * 解散队伍权限
+     */
+    TEAM_JOIN("team:join", "加入队伍"),
 
     // ==================== 其他功能权限 ====================
     /**

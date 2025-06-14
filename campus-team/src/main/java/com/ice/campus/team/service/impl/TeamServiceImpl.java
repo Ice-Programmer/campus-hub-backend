@@ -9,25 +9,31 @@ import com.ice.campus.api.user.bo.UserBasicInfoBO;
 import com.ice.campus.api.user.service.UserBasicRpcService;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
+import com.ice.campus.common.cache.constant.CacheConstant;
 import com.ice.campus.common.cache.constant.TeamConstant;
 import com.ice.campus.common.cache.manager.LockManager;
 import com.ice.campus.common.core.constant.CommonConstant;
 import com.ice.campus.common.core.constant.DatabaseConstant;
 import com.ice.campus.common.core.constant.ErrorCode;
+import com.ice.campus.common.core.enums.ApplyEnum;
 import com.ice.campus.common.core.enums.PublicEnum;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.common.core.exception.ThrowUtils;
 import com.ice.campus.common.core.utils.SqlUtils;
 import com.ice.campus.team.constant.TeamCommonConstant;
+import com.ice.campus.team.mapper.TeamApplicationMapper;
 import com.ice.campus.team.mapper.TeamMapper;
 import com.ice.campus.team.mapper.TeamMemberMapper;
 import com.ice.campus.team.model.entity.Team;
+import com.ice.campus.team.model.entity.TeamApplication;
 import com.ice.campus.team.model.entity.TeamMember;
+import com.ice.campus.team.model.enums.ApplicationStatusEnum;
 import com.ice.campus.team.model.enums.TeamCommonMemberEnum;
 import com.ice.campus.team.model.enums.TeamMemberStatusEnum;
 import com.ice.campus.team.model.enums.TeamStatusEnum;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.request.team.TeamJoinRequest;
 import com.ice.campus.team.model.request.team.TeamQueryRequest;
 import com.ice.campus.team.model.vo.TeamCreatorVO;
 import com.ice.campus.team.model.vo.TeamVO;
@@ -63,6 +69,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Resource
     private TeamMemberMapper teamMemberMapper;
+
+    @Resource
+    private TeamApplicationMapper teamApplicationMapper;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -144,6 +153,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     public TeamVO getTeamVOById(Long teamId) {
         // 获取队伍信息
         Team team = baseMapper.selectById(teamId);
+        ThrowUtils.throwIf(team == null, ErrorCode.NOT_FOUND_ERROR);
         // 获取队伍创建者信息
         Long creatorId = team.getCreatorId();
         UserBasicInfoBO creatorInfo = userBasicRpcService.getUserBasicInfoByUserId(creatorId);
@@ -186,6 +196,134 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         return teamVOPage;
     }
 
+    @Override
+    public Boolean joinTeam(TeamJoinRequest teamJoinRequest) {
+        // 获取当前登陆用户
+        UserBasicInfo currentUser = SecurityContext.getCurrentUser();
+        Long userId = currentUser.getId();
+
+        // 判断队伍是否存在
+        Long teamId = teamJoinRequest.getTeamId();
+        Team team = baseMapper.selectOne(Wrappers.<Team>lambdaQuery()
+                .eq(Team::getId, teamId)
+                .select(Team::getMaxMembers, Team::getCurrentMembers, Team::getIsApply, Team::getCreatorId)
+                .last(DatabaseConstant.LIMIT_ONE));
+        ThrowUtils.throwIf(ObjectUtils.isEmpty(team), ErrorCode.NOT_FOUND_ERROR, "队伍信息不存在，请刷新重试！");
+
+        // 判断是否为队长
+        if (team.getCreatorId().equals(userId)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "队长不能申请加入自己的队伍！");
+        }
+
+        // 校验人数是否已满
+        if (team.getCurrentMembers() >= team.getMaxMembers()) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前队伍人数已满！");
+        }
+
+        // 判断是否需要审批
+        Integer isApply = team.getIsApply();
+        if (ApplyEnum.NO_APPLY.getValue().equals(isApply)) {
+            // 直接加入
+            // 加锁保证线程安全
+            String key = CacheConstant.TEAM_JOIN_LOCK_PREFIX + teamId;
+            return lockManager.executeWithLock(key,
+                    5,
+                    10,
+                    TimeUnit.SECONDS,
+                    () -> joinTeamDirectly(teamId, userId, team.getMaxMembers()),
+                    () -> {
+                        throw new BusinessException(ErrorCode.OPERATION_ERROR, "加入队伍失败，请重试！");
+                    });
+
+        } else {
+            // 申请加入
+            applyTeam(teamId, userId, teamJoinRequest.getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * 直接加入队伍（无审批）
+     *
+     * @param teamId    队伍 id
+     * @param userId    用户 id
+     * @param maxMember 队伍最大人数
+     */
+    private boolean joinTeamDirectly(Long teamId, Long userId, Integer maxMember) {
+        transactionTemplate.executeWithoutResult(status -> {
+            try {
+                // 1. 检查用户是否已经在队伍中
+                checkUserNotInTeam(teamId, userId);
+
+                // 2. 再次检查队伍当前人数（防止并发情况下超员）
+                Team team = baseMapper.selectOne(
+                        Wrappers.<Team>lambdaQuery()
+                                .eq(Team::getId, teamId)
+                                .select(Team::getCurrentMembers, Team::getIsDelete)
+                );
+                ThrowUtils.throwIf(team.getCurrentMembers() >= maxMember, ErrorCode.OPERATION_ERROR, "队伍人数已满");
+
+                // 3. 创建队伍成员
+                TeamMember teamMember = new TeamMember();
+                teamMember.setTeamId(teamId);
+                teamMember.setUserId(userId);
+                teamMember.setRoleId(TeamCommonMemberEnum.MEMBER.getValue());
+                teamMember.setJoinTime(new Date());
+                teamMember.setStatus(TeamMemberStatusEnum.IN.getValue());
+                teamMemberMapper.insert(teamMember);
+
+                // 4. 更新队伍人数
+                int update = baseMapper.update(Wrappers.<Team>lambdaUpdate()
+                        .eq(Team::getId, teamId)
+                        .setSql("current_members = current_members + 1"));
+                ThrowUtils.throwIf(update != 1, ErrorCode.OPERATION_ERROR, "更新队伍人数失败，请重试");
+                log.info("用户 {} 成功加入队伍 {}", userId, teamId);
+            } catch (DuplicateKeyException e) {
+                status.setRollbackOnly();
+                log.error("用户重复加入队伍，用户：{}，队伍：{}", userId, teamId, e);
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户已在队伍中，请勿重复加入");
+            } catch (BusinessException e) {
+                status.setRollbackOnly();
+                throw e;
+            } catch (Exception e) {
+                status.setRollbackOnly();
+                log.error("直接加入队伍失败！, 用户：{}，队伍：{}", userId, teamId, e);
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "加入队伍失败，请重试");
+            }
+        });
+        return true;
+    }
+
+    /**
+     * 审批加入队伍
+     *
+     * @param teamId  队伍 id
+     * @param userId  用户 id
+     * @param message 申请消息
+     */
+    private void applyTeam(Long teamId, Long userId, String message) {
+        // 判断用户是否存在
+        checkUserNotInTeam(teamId, userId);
+
+        // 判断是否已经申请
+        TeamApplication original = teamApplicationMapper.selectOne(Wrappers.<TeamApplication>lambdaQuery()
+                .eq(TeamApplication::getTeamId, teamId)
+                .eq(TeamApplication::getUserId, userId)
+                .select(TeamApplication::getStatus));
+        if (original != null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "请勿重复提交申请！");
+        }
+
+        TeamApplication teamApplication = new TeamApplication();
+        teamApplication.setTeamId(teamId);
+        teamApplication.setUserId(userId);
+        teamApplication.setMessage(message);
+        teamApplication.setStatus(ApplicationStatusEnum.PENDING_REVIEW.getValue());
+        teamApplicationMapper.insert(teamApplication);
+        log.info("用户 {} 成功申请队伍 {}", userId, teamId);
+    }
+
     public QueryWrapper<Team> getQueryWrapper(TeamQueryRequest teamQueryRequest) {
         QueryWrapper<Team> wrapper = new QueryWrapper<>();
         if (teamQueryRequest == null) {
@@ -209,11 +347,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
         // 根据标签查询
         String tag = teamQueryRequest.getTag();
-        wrapper.like(StringUtils.isNotBlank(teamName), "tags", tag);
+        wrapper.like(StringUtils.isNotBlank(tag), "tags", tag);
 
         // 过滤不要 id
         List<Long> notId = teamQueryRequest.getNotId();
-        wrapper.ne(!CollectionUtils.isEmpty(ids), "id", notId);
+        wrapper.notIn(!CollectionUtils.isEmpty(notId), "id", notId);
 
         // 设置公开的
         wrapper.eq("is_public", PublicEnum.PUBLIC.getValue());
@@ -280,6 +418,19 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         });
 
         return team.getId();
+    }
+
+    /**
+     * 检查用户是否已在队伍中
+     */
+    private void checkUserNotInTeam(Long teamId, Long userId) {
+        TeamMember existingMember = teamMemberMapper.selectOne(
+                Wrappers.<TeamMember>lambdaQuery()
+                        .eq(TeamMember::getTeamId, teamId)
+                        .eq(TeamMember::getUserId, userId)
+                        .eq(TeamMember::getStatus, TeamMemberStatusEnum.IN.getValue())
+        );
+        ThrowUtils.throwIf(existingMember != null, ErrorCode.OPERATION_ERROR, "用户已在队伍中");
     }
 }
 

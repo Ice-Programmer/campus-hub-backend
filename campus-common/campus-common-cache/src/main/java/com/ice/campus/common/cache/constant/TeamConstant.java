@@ -16,4 +16,9 @@ public interface TeamConstant {
      */
     String TEAM_CREATE_LOCK_PREFIX = TEAM_PREFIX + "lock:create:";
 
+    /**
+     * 队伍加入队伍分布式锁
+     */
+    String TEAM_JOIN_LOCK_PREFIX = TEAM_PREFIX + "join:lock:";
+
 }
