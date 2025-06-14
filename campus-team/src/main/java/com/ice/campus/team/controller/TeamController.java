@@ -7,10 +7,7 @@ import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.ResultUtils;
 import com.ice.campus.common.core.constant.ErrorCode;
 import com.ice.campus.common.core.exception.BusinessException;
-import com.ice.campus.team.model.request.team.TeamCreateRequest;
-import com.ice.campus.team.model.request.team.TeamEditRequest;
-import com.ice.campus.team.model.request.team.TeamJoinRequest;
-import com.ice.campus.team.model.request.team.TeamQueryRequest;
+import com.ice.campus.team.model.request.team.*;
 import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
 import jakarta.annotation.Resource;
@@ -104,5 +101,19 @@ public class TeamController {
         Boolean result = teamService.joinTeam(teamJoinRequest);
 
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 解散队伍请求
+     *
+     * @return 解散成功
+     */
+    @PostMapping("/disband")
+    public BaseResponse<Boolean> disbandTeam(@RequestBody TeamDisbandRequest teamDisbandRequest) {
+        if (teamDisbandRequest == null || teamDisbandRequest.getTeamId() == null || teamDisbandRequest.getTeamId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+
+        return ResultUtils.success(teamService.disbandTeam(teamDisbandRequest.getTeamId()));
     }
 }

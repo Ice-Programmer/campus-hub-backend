@@ -250,6 +250,40 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         return true;
     }
 
+    @Override
+    public Boolean disbandTeam(Long teamId) {
+        UserBasicInfo currentUser = SecurityContext.getCurrentUser();
+        // 查找队伍
+        Team team = baseMapper.selectOne(Wrappers.<Team>lambdaQuery()
+                .eq(Team::getId, teamId)
+                .select(Team::getCreatorId));
+        ThrowUtils.throwIf(ObjectUtils.isEmpty(team), ErrorCode.NOT_FOUND_ERROR, "队伍不存在！");
+        if (!team.getCreatorId().equals(currentUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "仅队长可解散队伍！");
+        }
+
+        transactionTemplate.executeWithoutResult(status -> {
+            try {
+                // 删除队伍
+                boolean result = this.removeById(teamId);
+                ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "删除队伍失败！");
+
+                // 删除队伍成员关系表
+                int deleteNum = teamMemberMapper.delete(Wrappers.<TeamMember>lambdaQuery()
+                        .eq(TeamMember::getTeamId, teamId));
+                log.info("删除队伍成员关系: {}", deleteNum);
+            } catch (Exception e) {
+                status.setRollbackOnly();
+                log.error("删除队伍失败, {}", teamId, e);
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "解散队伍失败！");
+            }
+        });
+
+        log.info("解散队伍成功，teamId: {}", teamId);
+
+        return true;
+    }
+
     /**
      * 直接加入队伍（无审批）
      *
