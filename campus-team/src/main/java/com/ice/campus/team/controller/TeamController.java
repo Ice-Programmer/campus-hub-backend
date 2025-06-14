@@ -4,16 +4,16 @@ import com.ice.campus.common.auth.annotation.CheckPermission;
 import com.ice.campus.common.auth.enums.PermissionEnum;
 import com.ice.campus.common.core.common.BaseResponse;
 import com.ice.campus.common.core.common.ResultUtils;
+import com.ice.campus.common.core.constant.ErrorCode;
+import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author <a href="https://github.com/Ice-Programmer">chenjiahan</a>
@@ -48,5 +48,20 @@ public class TeamController {
     @PostMapping("/edit")
     public BaseResponse<Boolean> editTeam(@RequestBody @Valid TeamEditRequest teamEditRequest) {
         return ResultUtils.success(teamService.editTeam(teamEditRequest));
+    }
+
+    /**
+     * 根据 id 获取队伍信息
+     *
+     * @param teamId 队伍 id
+     * @return 队伍信息
+     */
+    @GetMapping("/get/vo/{id}")
+    public BaseResponse<TeamVO> getTeamVO(@PathVariable("id") Long teamId) {
+        if (teamId == null || teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍 id 为空！");
+        }
+
+        return ResultUtils.success(teamService.getTeamVOById(teamId));
     }
 }

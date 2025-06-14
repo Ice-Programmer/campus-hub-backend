@@ -3,6 +3,8 @@ package com.ice.campus.team.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
+import com.ice.campus.api.user.bo.UserBasicInfoBO;
+import com.ice.campus.api.user.service.UserBasicRpcService;
 import com.ice.campus.common.auth.security.SecurityContext;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.common.cache.constant.TeamConstant;
@@ -12,6 +14,7 @@ import com.ice.campus.common.core.constant.ErrorCode;
 import com.ice.campus.common.core.exception.BusinessException;
 import com.ice.campus.common.core.exception.ThrowUtils;
 import com.ice.campus.team.constant.TeamCommonConstant;
+import com.ice.campus.team.mapper.TeamMapper;
 import com.ice.campus.team.mapper.TeamMemberMapper;
 import com.ice.campus.team.model.entity.Team;
 import com.ice.campus.team.model.entity.TeamMember;
@@ -20,10 +23,13 @@ import com.ice.campus.team.model.enums.TeamMemberStatusEnum;
 import com.ice.campus.team.model.enums.TeamStatusEnum;
 import com.ice.campus.team.model.request.team.TeamCreateRequest;
 import com.ice.campus.team.model.request.team.TeamEditRequest;
+import com.ice.campus.team.model.vo.TeamCreatorVO;
+import com.ice.campus.team.model.vo.TeamVO;
 import com.ice.campus.team.service.TeamService;
-import com.ice.campus.team.mapper.TeamMapper;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -51,6 +57,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Resource
     private LockManager lockManager;
+
+    @DubboReference
+    private UserBasicRpcService userBasicRpcService;
 
     private final static Gson GSON = new Gson();
 
@@ -117,6 +126,19 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         log.info("修改队伍成功，队伍 id：{}，修改用户：{}", teamId, currentUser.getId());
         return true;
+    }
+
+    @Override
+    public TeamVO getTeamVOById(Long teamId) {
+        // 获取队伍信息
+        Team team = baseMapper.selectById(teamId);
+        // 获取队伍创建者信息
+        Long creatorId = team.getCreatorId();
+        UserBasicInfoBO creatorInfo = userBasicRpcService.getUserBasicInfoByUserId(creatorId);
+        TeamVO teamVO = TeamVO.objToVO(team);
+        TeamCreatorVO teamCreatorVO = TeamCreatorVO.from(creatorInfo);
+        teamVO.setCreator(teamCreatorVO);
+        return teamVO;
     }
 
 

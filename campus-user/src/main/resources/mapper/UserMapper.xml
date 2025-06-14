@@ -46,7 +46,7 @@
                u.university as school_id,
                u.create_time,
                p.permission_code
-        from campus_user.user u
+        from user u
                  left join user_role ur on u.id = ur.user_id
                  left join role r on ur.role_id = r.id
                  left join role_permission rp on r.id = rp.role_id
@@ -58,4 +58,18 @@
           and (r.status = 1 or r.id is null)
           and (p.status = 1 or p.id is null);
     </select>
+    <select id="selectUserBasicInfoByUserId" resultType="com.ice.campus.api.user.bo.UserBasicInfoBO">
+        select u.id,
+               u.username,
+               u.user_avatar,
+               r.role_name  as role,
+               u.university as school_id,
+               s.school_name
+        from user u
+                 left join user_role ur on u.id = ur.user_id
+                 left join role r on ur.role_id = r.id
+                 left join school s on u.university = s.id
+        where u.id = #{userId}
+    </select>
+
 </mapper>

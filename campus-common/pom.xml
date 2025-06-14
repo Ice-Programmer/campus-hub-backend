@@ -15,7 +15,6 @@
         <module>campus-common-core</module>
         <module>campus-common-cache</module>
         <module>campus-common-auth</module>
-        <module>campus-common-dubbo</module>
         <module>campus-common-rocketmq</module>
     </modules>
 

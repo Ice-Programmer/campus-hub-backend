@@ -40,4 +40,14 @@ public class ThrowUtils {
         throwIf(condition, new BusinessException(errorCode, message));
     }
 
+    /**
+     * 条件成立则抛异常(RPC)
+     *
+     * @param condition 条件
+     * @param errorCode 错误码
+     * @param message   错误信息
+     */
+    public static void throwRpcIf(boolean condition, ErrorCode errorCode, String message) {
+        throwIf(condition, new BusinessRpcException(errorCode, message));
+    }
 }

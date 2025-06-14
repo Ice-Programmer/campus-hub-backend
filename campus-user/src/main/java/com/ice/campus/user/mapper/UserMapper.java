@@ -1,6 +1,7 @@
 package com.ice.campus.user.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.ice.campus.api.user.bo.UserBasicInfoBO;
 import com.ice.campus.common.auth.vo.UserBasicInfo;
 import com.ice.campus.user.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
@@ -21,8 +22,13 @@ public interface UserMapper extends BaseMapper<User> {
      * @return 用户信息
      */
     UserBasicInfo getUserBasicInfoByEmail(@Param("email") String email);
+
+
+    /**
+     * 查询用户基础信息
+     *
+     * @param userId 用户 id
+     * @return 用户基础信息
+     */
+    UserBasicInfoBO selectUserBasicInfoByUserId(@Param("userId") long userId);
 }
-
-
-
-
