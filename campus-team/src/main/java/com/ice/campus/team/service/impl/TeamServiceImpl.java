@@ -153,10 +153,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     public TeamVO getTeamVOById(Long teamId) {
         // 获取队伍信息
         Team team = baseMapper.selectById(teamId);
-        ThrowUtils.throwIf(team == null, ErrorCode.NOT_FOUND_ERROR);
+        ThrowUtils.throwIf(team == null, ErrorCode.NOT_FOUND_ERROR, "队伍不存在或已删除");
         // 获取队伍创建者信息
         Long creatorId = team.getCreatorId();
         UserBasicInfoBO creatorInfo = userBasicRpcService.getUserBasicInfoByUserId(creatorId);
+        ThrowUtils.throwIf(creatorInfo == null, ErrorCode.NOT_FOUND_ERROR, "队伍创建者信息不存在");
         TeamVO teamVO = TeamVO.objToVO(team);
         TeamCreatorVO teamCreatorVO = TeamCreatorVO.from(creatorInfo);
         teamVO.setCreator(teamCreatorVO);
@@ -206,9 +207,15 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         Long teamId = teamJoinRequest.getTeamId();
         Team team = baseMapper.selectOne(Wrappers.<Team>lambdaQuery()
                 .eq(Team::getId, teamId)
-                .select(Team::getMaxMembers, Team::getCurrentMembers, Team::getIsApply, Team::getCreatorId)
+                .select(Team::getMaxMembers, Team::getCurrentMembers, Team::getIsApply, Team::getCreatorId, Team::getStatus)
                 .last(DatabaseConstant.LIMIT_ONE));
         ThrowUtils.throwIf(ObjectUtils.isEmpty(team), ErrorCode.NOT_FOUND_ERROR, "队伍信息不存在，请刷新重试！");
+
+        // 判断当前队伍状态是否正确
+        Integer status = team.getStatus();
+        if (TeamStatusEnum.RECRUITING.getValue().equals(status) || TeamStatusEnum.IN_PROGRESS.getValue().equals(status)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "队伍状态不正确！");
+        }
 
         // 判断是否为队长
         if (team.getCreatorId().equals(userId)) {
@@ -230,7 +237,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                     5,
                     10,
                     TimeUnit.SECONDS,
-                    () -> joinTeamDirectly(teamId, userId, team.getMaxMembers()),
+                    () -> joinTeamDirectly(teamId, userId),
                     () -> {
                         throw new BusinessException(ErrorCode.OPERATION_ERROR, "加入队伍失败，请重试！");
                     });
@@ -246,23 +253,27 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     /**
      * 直接加入队伍（无审批）
      *
-     * @param teamId    队伍 id
-     * @param userId    用户 id
-     * @param maxMember 队伍最大人数
+     * @param teamId 队伍 id
+     * @param userId 用户 id
      */
-    private boolean joinTeamDirectly(Long teamId, Long userId, Integer maxMember) {
+    private boolean joinTeamDirectly(Long teamId, Long userId) {
         transactionTemplate.executeWithoutResult(status -> {
             try {
                 // 1. 检查用户是否已经在队伍中
                 checkUserNotInTeam(teamId, userId);
 
                 // 2. 再次检查队伍当前人数（防止并发情况下超员）
-                Team team = baseMapper.selectOne(
+                Team currentTeamState = baseMapper.selectOne(
                         Wrappers.<Team>lambdaQuery()
                                 .eq(Team::getId, teamId)
-                                .select(Team::getCurrentMembers, Team::getIsDelete)
+                                .select(Team::getCurrentMembers, Team::getMaxMembers, Team::getIsDelete)
                 );
-                ThrowUtils.throwIf(team.getCurrentMembers() >= maxMember, ErrorCode.OPERATION_ERROR, "队伍人数已满");
+                if (ObjectUtils.isEmpty(currentTeamState)) {
+                    throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "队伍不存在或已解散");
+                }
+                if (currentTeamState.getCurrentMembers() >= currentTeamState.getMaxMembers()) {
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "队伍人数已满");
+                }
 
                 // 3. 创建队伍成员
                 TeamMember teamMember = new TeamMember();
@@ -342,8 +353,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         wrapper.like(StringUtils.isNotBlank(teamName), "team_name", teamName);
 
         // 根据创建用户查询
-        Long userId = teamQueryRequest.getCreatorId();
-        wrapper.eq(!ObjectUtils.isEmpty(userId), "creator_id", userId);
+        Long creatorId = teamQueryRequest.getCreatorId();
+        wrapper.eq(!ObjectUtils.isEmpty(creatorId), "creator_id", creatorId);
 
         // 根据标签查询
         String tag = teamQueryRequest.getTag();
@@ -367,10 +378,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         // 根据队伍类型
         Integer teamType = teamQueryRequest.getTeamType();
         wrapper.eq(!ObjectUtils.isEmpty(teamType), "team_type", teamType);
-
-        // 根据创建者
-        Long creatorId = teamQueryRequest.getCreatorId();
-        wrapper.eq(!ObjectUtils.isEmpty(creatorId), "creator_id", creatorId);
 
         wrapper.eq("is_delete", false);
         String sortField = teamQueryRequest.getSortField();
@@ -413,7 +420,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             } catch (Exception e) {
                 log.error("创建队伍失败，request: {}, userId: {}", request, currentUser.getId(), e);
                 status.setRollbackOnly();
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, "队伍创建失败，" + e.getMessage());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "队伍创建失败，请重试");
             }
         });
 
